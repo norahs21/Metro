@@ -1,114 +1,83 @@
 <?php
+/* صفحة المحطات: قائمة المحطات من قاعدة البيانات + بحث وفلترة بالجافاسكربت (الطالبة 2) */
+require_once 'config.php';
+
 $pageTitle = 'المحطات';
+
+// المسار المختار من الرابط (مثال: stations.php?line=2) عشان نفعّل زر الفلترة
+$selectedLine = filter_input(INPUT_GET, 'line', FILTER_VALIDATE_INT);
+
+$lines        = get_lines($conn);
+$stationLines = get_station_lines($conn);
+
+$stations = $conn->query(
+    'SELECT s.id, s.name, s.description, s.image, COUNT(p.id) AS places_count
+     FROM stations s
+     LEFT JOIN places p ON p.station_id = s.id
+     GROUP BY s.id, s.name, s.description, s.image
+     ORDER BY s.id'
+)->fetch_all(MYSQLI_ASSOC);
+
 include 'includes/header.php';
 ?>
 
 <section class="page-header">
+    <span class="kicker">مترو الرياض</span>
     <h1>محطات المترو</h1>
-    <p>اختر محطة عشان تشوف الأماكن اللي حولها.</p>
+    <p>اختر محطة عشان تشوف الأماكن اللي حولها، أو ابحث باسمها.</p>
 </section>
 
-<!-- أزرار الفلترة -->
-<div class="filter-bar">
-    <button class="filter-btn active" data-line="all">الكل</button>
-    <button class="filter-btn" data-line="blue">الخط الأزرق</button>
-    <button class="filter-btn" data-line="red">الخط الأحمر</button>
-    <button class="filter-btn" data-line="yellow">الخط الأصفر</button>
+<!-- البحث والفلترة -->
+<div class="toolbar">
+    <div class="search-box">
+        <?php echo icon('search'); ?>
+        <label for="station-search" class="sr-only">ابحث باسم المحطة</label>
+        <input type="search" id="station-search" placeholder="ابحث باسم المحطة..." autocomplete="off">
+    </div>
+
+    <div class="filter-bar" role="group" aria-label="فلترة حسب المسار">
+        <button type="button" class="filter-btn <?php echo $selectedLine ? '' : 'active'; ?>" data-line="all">الكل</button>
+        <?php foreach ($lines as $line): ?>
+            <button type="button"
+                    class="filter-btn <?php echo $selectedLine === (int) $line['id'] ? 'active' : ''; ?>"
+                    data-line="<?php echo (int) $line['id']; ?>"
+                    style="<?php echo line_style($line['color']); ?>">
+                <span class="dot"></span><?php echo e($line['name']); ?>
+            </button>
+        <?php endforeach; ?>
+    </div>
 </div>
 
+<p class="results-count" id="results-count" aria-live="polite"><?php echo stations_label(count($stations)); ?></p>
+
 <!-- كروت المحطات -->
-<section class="cards">
-
-    <article class="card station-card" data-lines="blue yellow">
-        <img src="images/kafd.jpg" alt="محطة المركز المالي">
-        <div class="card-body">
-            <h3>المركز المالي (KAFD)</h3>
-            <div class="badges">
-                <span class="line-badge line-blue">الأزرق</span>
-                <span class="line-badge line-yellow">الأصفر</span>
+<section class="cards" id="stations-grid">
+    <?php foreach ($stations as $station): ?>
+        <?php
+        $lineIds = array_column($stationLines[$station['id']] ?? [], 'id');
+        ?>
+        <article class="card station-card"
+                 data-lines="<?php echo e(implode(' ', $lineIds)); ?>"
+                 data-name="<?php echo e($station['name']); ?>">
+            <a href="station.php?id=<?php echo (int) $station['id']; ?>" class="card-media">
+                <img src="images/<?php echo e($station['image']); ?>" alt="محطة <?php echo e($station['name']); ?>" loading="lazy">
+                <span class="count-chip"><?php echo icon('pin'); ?><?php echo places_label($station['places_count']); ?></span>
+                <span class="media-badges"><?php echo line_badges($stationLines[$station['id']] ?? []); ?></span>
+            </a>
+            <div class="card-body">
+                <h3><?php echo e($station['name']); ?></h3>
+                <p><?php echo e($station['description']); ?></p>
+                <a href="station.php?id=<?php echo (int) $station['id']; ?>" class="btn-link">عرض الأماكن</a>
             </div>
-            <a href="station.php?id=1" class="btn-link">عرض الأماكن</a>
-        </div>
-    </article>
-
-    <article class="card station-card" data-lines="blue red">
-        <img src="images/stc.jpg" alt="محطة STC">
-        <div class="card-body">
-            <h3>محطة STC</h3>
-            <div class="badges">
-                <span class="line-badge line-blue">الأزرق</span>
-                <span class="line-badge line-red">الأحمر</span>
-            </div>
-            <a href="station.php?id=2" class="btn-link">عرض الأماكن</a>
-        </div>
-    </article>
-
-    <article class="card station-card" data-lines="blue">
-        <img src="images/museum.jpg" alt="محطة المتحف الوطني">
-        <div class="card-body">
-            <h3>المتحف الوطني</h3>
-            <div class="badges">
-                <span class="line-badge line-blue">الأزرق</span>
-            </div>
-            <a href="station.php?id=3" class="btn-link">عرض الأماكن</a>
-        </div>
-    </article>
-
-    <article class="card station-card" data-lines="blue">
-        <img src="images/qasr.jpg" alt="محطة قصر الحكم">
-        <div class="card-body">
-            <h3>قصر الحكم</h3>
-            <div class="badges">
-                <span class="line-badge line-blue">الأزرق</span>
-            </div>
-            <a href="station.php?id=4" class="btn-link">عرض الأماكن</a>
-        </div>
-    </article>
-
-    <article class="card station-card" data-lines="red">
-        <img src="images/ksu.jpg" alt="محطة جامعة الملك سعود">
-        <div class="card-body">
-            <h3>جامعة الملك سعود</h3>
-            <div class="badges">
-                <span class="line-badge line-red">الأحمر</span>
-            </div>
-            <a href="station.php?id=5" class="btn-link">عرض الأماكن</a>
-        </div>
-    </article>
-
-    <article class="card station-card" data-lines="red">
-        <img src="images/takhassusi.jpg" alt="محطة التخصصي">
-        <div class="card-body">
-            <h3>التخصصي</h3>
-            <div class="badges">
-                <span class="line-badge line-red">الأحمر</span>
-            </div>
-            <a href="station.php?id=6" class="btn-link">عرض الأماكن</a>
-        </div>
-    </article>
-
-    <article class="card station-card" data-lines="yellow">
-        <img src="images/pnu.jpg" alt="محطة جامعة الأميرة نورة">
-        <div class="card-body">
-            <h3>جامعة الأميرة نورة</h3>
-            <div class="badges">
-                <span class="line-badge line-yellow">الأصفر</span>
-            </div>
-            <a href="station.php?id=7" class="btn-link">عرض الأماكن</a>
-        </div>
-    </article>
-
-    <article class="card station-card" data-lines="yellow">
-        <img src="images/airport.jpg" alt="محطة مطار الملك خالد">
-        <div class="card-body">
-            <h3>مطار الملك خالد (صالة 1-2)</h3>
-            <div class="badges">
-                <span class="line-badge line-yellow">الأصفر</span>
-            </div>
-            <a href="station.php?id=8" class="btn-link">عرض الأماكن</a>
-        </div>
-    </article>
-
+        </article>
+    <?php endforeach; ?>
 </section>
+
+<!-- تظهر إذا ما فيه نتائج -->
+<div class="empty-state" id="no-results" hidden>
+    <?php echo icon('search', 'icon empty-icon'); ?>
+    <h2>ما لقينا محطة بهذا الاسم</h2>
+    <p>جرّب كلمة ثانية أو اختر مسار مختلف.</p>
+</div>
 
 <?php include 'includes/footer.php'; ?>
