@@ -1,0 +1,614 @@
+/* 1. المتغيرات (الألوان) */
+:root {
+    --primary: #0B6E4F;
+    --primary-dark: #08503A;
+    --bg: #F6F7F5;
+    --surface: #FFFFFF;
+    --text: #1F2933;
+    --muted: #5F6B76;
+    --border: #E3E5E8;
+
+    --line-blue: #0072CE;
+    --line-red: #E30613;
+    --line-yellow: #FFC72C;
+
+    --radius: 12px;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* 2. الأساسيات */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'IBM Plex Sans Arabic', Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 16px;
+}
+
+/* 3. الهيدر وشريط التنقل */
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.logo {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.main-nav ul {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+}
+
+.main-nav a {
+    color: var(--text);
+    font-weight: 500;
+}
+
+.main-nav a:hover {
+    color: var(--primary);
+}
+
+.theme-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+/* 4. العناوين والأقسام */
+section {
+    margin-bottom: 48px;
+}
+
+h1 {
+    font-size: 2rem;
+    line-height: 1.3;
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+}
+
+/* 5. الأزرار */
+.btn {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn:hover {
+    background: var(--primary-dark);
+}
+
+/* 6. الواجهة (Hero) */
+.hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 56px 32px;
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 2.4rem;
+    margin-bottom: 12px;
+}
+
+.hero p {
+    max-width: 600px;
+    margin: 0 auto 24px;
+    opacity: 0.9;
+}
+
+.hero .btn {
+    background: #fff;
+    color: var(--primary);
+}
+
+.hero .btn:hover {
+    background: #E8F3EF;
+}
+
+/* 7. شارات الخطوط */
+.lines-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.line-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.lines-list .line-badge {
+    padding: 10px 24px;
+    font-size: 1rem;
+}
+
+.line-blue   { background: var(--line-blue); }
+.line-red    { background: var(--line-red); }
+.line-yellow { background: var(--line-yellow); color: var(--text); }
+
+/* 8. دعوة الاقتراح + رأس الصفحات */
+.cta {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px 24px;
+    text-align: center;
+}
+
+.cta p {
+    color: var(--muted);
+    margin-bottom: 20px;
+}
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header p {
+    color: var(--muted);
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+/* 9. شبكة الكروت */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background: var(--border);
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    padding: 16px 20px 20px;
+}
+
+.card-body h3 {
+    font-size: 1.15rem;
+}
+
+.card-body p {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.btn-link {
+    margin-top: auto;
+    font-weight: 700;
+}
+
+.btn-link::after {
+    content: " ←";
+}
+
+/* 10. تفاصيل كرت المكان */
+.category-tag {
+    align-self: flex-start;
+    background: #E8F3EF;
+    color: var(--primary);
+    padding: 2px 12px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.card-body .walk-time {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* 11. أزرار الفلترة */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+/* 12. صفحة تفاصيل المحطة */
+.station-info {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 32px;
+}
+
+.station-img {
+    width: 280px;
+    height: 180px;
+    flex-shrink: 0;
+    object-fit: cover;
+    border-radius: 8px;
+    background: var(--border);
+}
+
+.station-text {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.station-text p {
+    color: var(--muted);
+}
+
+/*13. النموذج */
+.form-section {
+    max-width: 640px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.15);
+}
+
+.form .btn {
+    align-self: flex-start;
+}
+
+/* 14. رسائل الأخطاء والنجاح */
+.error-msg {
+    color: #C62828;
+    font-size: 0.85rem;
+}
+
+.form-group .invalid {
+    border-color: #C62828;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: #E6F4EA;
+    color: #1E6B34;
+}
+
+.alert-error {
+    background: #FDECEA;
+    color: #C62828;
+}
+
+/* 15. الفوتر */
+.site-footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    text-align: center;
+    padding: 24px 16px;
+    font-size: 0.9rem;
+}
+
+/* 16. ألوان الوضع الليلي */
+body.dark {
+    --primary: #2FA37A;
+    --primary-dark: #23805F;
+    --bg: #121614;
+    --surface: #1C2320;
+    --text: #E6EAE8;
+    --muted: #9AA5A0;
+    --border: #2C3531;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+body.dark .category-tag {
+    background: #1F3A30;
+}
+
+/* 17. التصميم المتجاوب (الجوال) */
+@media (max-width: 768px) {
+    .site-header {
+        flex-wrap: wrap;
+        padding: 12px 16px;
+    }
+
+    .main-nav {
+        order: 3;
+        width: 100%;
+    }
+
+    .main-nav ul {
+        justify-content: center;
+        gap: 16px;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+    }
+
+    .hero {
+        padding: 40px 20px;
+    }
+
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+
+    .station-info {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .station-img {
+        width: 100%;
+    }
+
+    .form {
+        padding: 20px;
+    }
+}
+
+/* 18. صفحة دخول المشرف */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 420px;
+    padding: 0;
+    text-align: center;
+}
+
+.login-box h1 {
+    font-size: 1.5rem;
+    margin: 8px 0 20px;
+}
+
+.login-box .form {
+    text-align: right;
+}
+
+.login-box .btn {
+    align-self: stretch;
+}
+
+.login-box .back-link {
+    margin-top: 16px;
+}
+
+/* ===== 19. لوحة التحكم ===== */
+.admin-tag {
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: #E8F3EF;
+    padding: 2px 10px;
+    border-radius: 999px;
+    vertical-align: middle;
+}
+
+.dash-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.table-wrap {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 12px 16px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.table th {
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-sm {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.btn-edit {
+    background: #E8F3EF;
+    color: var(--primary);
+}
+
+.btn-delete {
+    background: #FDECEA;
+    color: #C62828;
+}
+
+.status {
+    padding: 2px 12px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-new      { background: #FFF4D6; color: #8A6100; }
+.status-approved { background: #E6F4EA; color: #1E6B34; }
+.status-rejected { background: #FDECEA; color: #C62828; }
