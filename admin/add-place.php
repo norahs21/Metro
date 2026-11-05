@@ -1,77 +1,134 @@
 <?php
-$pageTitle = 'إضافة مكان';
-include '../includes/admin-header.php';
+/* إضافة مكان جديد: عملية Create (الطالبة 3)
+   ممكن نفتحها من اقتراح زائر: add-place.php?suggestion=3
+   فتنعبّى الحقول من الاقتراح، وبعد الحفظ تتغير حالة الاقتراح إلى "مقبول" */
+require_once __DIR__ . '/../includes/auth.php';
+
+$pageTitle    = 'إضافة مكان';
+$stations     = get_stations($conn);
+$errors       = [];
+$suggestionId = 0;
+
+$place = [
+    'station_id'   => '',
+    'name'         => '',
+    'category'     => '',
+    'description'  => '',
+    'walk_minutes' => '',
+    'map_url'      => '',
+];
+
+// 1. تعبئة الحقول من اقتراح زائر
+$fromSuggestion = filter_input(INPUT_GET, 'suggestion', FILTER_VALIDATE_INT)
+    ?: filter_input(INPUT_POST, 'suggestion_id', FILTER_VALIDATE_INT);
+
+$suggestion = null;
+if ($fromSuggestion) {
+    $stmt = $conn->prepare("SELECT id, station_id, place_name, category, note, visitor_name FROM suggestions WHERE id = ? AND status = 'new'");
+    $stmt->bind_param('i', $fromSuggestion);
+    $stmt->execute();
+    $suggestion = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if ($suggestion) {
+        $suggestionId = (int) $suggestion['id'];
+        $place['station_id']  = $suggestion['station_id'];
+        $place['name']        = $suggestion['place_name'];
+        $place['category']    = $suggestion['category'];
+        $place['description'] = (string) $suggestion['note'];
+    }
+}
+
+// 2. استقبال النموذج
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_check()) {
+        $errors['general'] = 'انتهت صلاحية النموذج، حدّث الصفحة وحاول مرة ثانية.';
+    } else {
+        [$place, $errors] = validate_place($conn, $_POST);
+
+        $imageError = validate_image($_FILES['image'] ?? null);
+        if ($imageError) {
+            $errors['image'] = $imageError;
+        }
+    }
+
+    if (!$errors) {
+        $image = save_image($_FILES['image'] ?? null);
+
+        if ($image === false) {
+            $errors['image'] = 'تعذّر حفظ الصورة على الخادم.';
+        } else {
+            try {
+                $stationId  = (int) $place['station_id'];
+                $minutes    = (int) $place['walk_minutes'];
+                $mapUrl     = $place['map_url'] !== '' ? $place['map_url'] : null;
+
+                $stmt = $conn->prepare(
+                    'INSERT INTO places (station_id, name, category, description, walk_minutes, image, map_url)
+                     VALUES (?, ?, ?, ?, ?, ?, ?)'
+                );
+                $stmt->bind_param('isssiss', $stationId, $place['name'], $place['category'],
+                    $place['description'], $minutes, $image, $mapUrl);
+                $stmt->execute();
+                $stmt->close();
+
+                // إذا الإضافة من اقتراح، نخليه "مقبول"
+                if ($suggestionId) {
+                    $stmt = $conn->prepare("UPDATE suggestions SET status = 'approved' WHERE id = ?");
+                    $stmt->bind_param('i', $suggestionId);
+                    $stmt->execute();
+                    $stmt->close();
+                }
+
+                set_flash('success', 'تمت إضافة «' . $place['name'] . '» بنجاح'
+                    . ($suggestionId ? '، وتم قبول اقتراح الزائر.' : '.'));
+                redirect('dashboard.php');
+            } catch (mysqli_sql_exception $e) {
+                delete_place_image($image); // الصورة ما لها داعي إذا ما انحفظ المكان
+                $errors['general'] = 'صار خطأ في قاعدة البيانات، ما تمت الإضافة.';
+            }
+        }
+    }
+}
+
+include __DIR__ . '/../includes/admin-header.php';
 ?>
 
-<a href="dashboard.php" class="back-link">&rarr; الرجوع للوحة التحكم</a>
+<a href="dashboard.php" class="back-link"><?php echo icon('back'); ?> الرجوع للوحة التحكم</a>
 
-<section class="form-section">
+<div class="page-header">
+    <span class="kicker">إضافة سجل جديد</span>
     <h1>إضافة مكان جديد</h1>
-    <p class="muted">عبّي بيانات المكان القريب من المحطة.</p>
-    <br>
+    <p>عبّي بيانات المكان القريب من المحطة، وبعد الحفظ يظهر مباشرة في الموقع.</p>
+</div>
 
-    <form id="place-form" class="form" action="add-place.php" method="post" novalidate>
+<?php if ($errors): ?>
+    <?php echo alert_box('error', $errors['general'] ?? 'ما تمت الإضافة، راجع الحقول المحددة باللون الأحمر.'); ?>
+<?php endif; ?>
 
-        <div class="form-group">
-            <label for="station_id">المحطة</label>
-            <select id="station_id" name="station_id">
-                <option value="">اختر المحطة</option>
-                <option value="1">المركز المالي (KAFD)</option>
-                <option value="2">محطة STC</option>
-                <option value="3">المتحف الوطني</option>
-                <option value="4">قصر الحكم</option>
-                <option value="5">جامعة الملك سعود</option>
-                <option value="6">التخصصي</option>
-                <option value="7">جامعة الأميرة نورة</option>
-                <option value="8">مطار الملك خالد (صالة 1-2)</option>
-            </select>
-            <span class="error-msg"></span>
+<?php if ($suggestion): ?>
+    <div class="alert alert-info from-suggestion">
+        <?php echo icon('inbox'); ?>
+        <span>البيانات معبّاة من اقتراح الزائر <strong><?php echo e($suggestion['visitor_name']); ?></strong>. كمّل المسافة مشيًا والصورة ثم احفظ.</span>
+    </div>
+<?php endif; ?>
+
+<div class="admin-form-layout">
+    <section class="form-section">
+        <?php
+        $formAction  = 'add-place.php';
+        $submitLabel = 'حفظ المكان';
+        include __DIR__ . '/../includes/place-form.php';
+        ?>
+    </section>
+
+    <aside class="side-card">
+        <h2>معاينة الصورة</h2>
+        <div class="image-preview" id="image-preview">
+            <?php echo icon('image'); ?>
         </div>
+        <p class="hint">بعد ما تختار صورة تظهر معاينتها هنا قبل الرفع.</p>
+    </aside>
+</div>
 
-        <div class="form-group">
-            <label for="name">اسم المكان</label>
-            <input type="text" id="name" name="name">
-            <span class="error-msg"></span>
-        </div>
-
-        <div class="form-group">
-            <label for="category">النوع</label>
-            <select id="category" name="category">
-                <option value="">اختر النوع</option>
-                <option value="مقهى">مقهى</option>
-                <option value="مطعم">مطعم</option>
-                <option value="معلم">معلم</option>
-                <option value="حديقة">حديقة</option>
-                <option value="مول">مول</option>
-            </select>
-            <span class="error-msg"></span>
-        </div>
-
-        <div class="form-group">
-            <label for="description">الوصف</label>
-            <textarea id="description" name="description" rows="3"></textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="walk_minutes">المسافة مشيًا (بالدقائق)</label>
-            <input type="number" id="walk_minutes" name="walk_minutes" min="1" max="60">
-            <span class="error-msg"></span>
-        </div>
-
-        <div class="form-group">
-            <label for="image">اسم ملف الصورة</label>
-            <input type="text" id="image" name="image" placeholder="masmak.jpg" dir="ltr">
-        </div>
-
-        <div class="form-group">
-            <label for="map_url">رابط الخريطة (اختياري)</label>
-            <input type="url" id="map_url" name="map_url" placeholder="https://maps.google.com/..." dir="ltr">
-            <span class="error-msg"></span>
-        </div>
-
-        <button type="submit" class="btn">حفظ المكان</button>
-
-    </form>
-</section>
-
-<?php include '../includes/admin-footer.php'; ?>
+<?php include __DIR__ . '/../includes/admin-footer.php'; ?>

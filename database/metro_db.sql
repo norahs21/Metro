@@ -70,7 +70,7 @@ CREATE TABLE admins (
 );
 
 INSERT INTO metro_lines (name, color) VALUES
-('المسار الازرق','#0072CE'),
+('المسار الأزرق', '#0072CE'),
 ('المسار الأحمر', '#E30613'),
 ('المسار الأصفر', '#FFC72C');
 
@@ -107,3 +107,10 @@ INSERT INTO suggestions (station_id, place_name, category, note, visitor_name, e
 (6, 'مقهى تجريبي', 'مقهى', 'مقهى هادئ مناسب للمذاكرة.', 'سارة', 'sara@example.com'),
 (1, 'مطعم تجريبي', 'مطعم', 'أكل لذيذ وأسعار مناسبة.', 'نورة', 'noura@example.com');
 
+
+/* حساب المشرف التجريبي (الطالبة 3)
+   اسم المستخدم: admin
+   كلمة المرور:  Metro@2026
+   كلمة المرور مخزنة مشفرة بـ password_hash() ولا تُخزن كنص عادي */
+INSERT INTO admins (username, password_hash) VALUES
+('admin', '$2y$10$DSRUW3lIc66Hui0EwGbUhey.WrBwrFMFKgDMG7/E7hlHdnysBl0ha');
